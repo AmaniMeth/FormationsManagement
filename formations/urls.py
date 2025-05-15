@@ -17,6 +17,6 @@ urlpatterns += [
     path('stats/counts/', stats_counts, name='stats-counts'),
     path('stats/inscriptions_per_formation/', inscriptions_per_formation, name='inscriptions-per-formation'),
     path('formations/<int:formation_id>/stagiaires/', stagiaires_par_formation, name='stagiaires-par-formation'),
-    path('formateurs/<int:formateur_id>/formations/', formations_par_formateur, name='formations-par-formateur'),
+    
 
 ]

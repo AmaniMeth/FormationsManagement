@@ -61,7 +61,3 @@ def formations_a_venir(request):
     formations = Formation.objects.filter(date_debut__gt=today).values('id', 'titre', 'date_debut', 'date_fin')
     return Response(list(formations))
 
-@api_view(['GET'])
-def formations_par_formateur(request, formateur_id):
-    formations = Formation.objects.filter(formateur_id=formateur_id).values('id', 'titre', 'date_debut', 'date_fin')
-    return Response(list(formations))
