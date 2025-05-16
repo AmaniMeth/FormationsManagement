@@ -6,7 +6,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.db.models import Count
 from django.utils import timezone
+from rest_framework import status
+from django.db.models import Avg
+from .models import NoteFormation
 
+from formations import models
 
 class FormateurViewSet(viewsets.ModelViewSet):
     queryset = Formateur.objects.all()
@@ -61,3 +65,23 @@ def formations_a_venir(request):
     formations = Formation.objects.filter(date_debut__gt=today).values('id', 'titre', 'date_debut', 'date_fin')
     return Response(list(formations))
 
+@api_view(['POST'])
+def noter_formation(request):
+    serializer = NoteFormationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def moyennes_formations(request):
+    moyennes = (
+        NoteFormation.objects.values('formation__id', 'formation__titre')
+        .annotate(moyenne_note=Avg('note'))
+    )
+
+    return Response(moyennes)
+
+class NoteFormationViewSet(viewsets.ModelViewSet):
+    queryset = NoteFormation.objects.all()
+    serializer_class = NoteFormationSerializer
