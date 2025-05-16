@@ -1,11 +1,15 @@
 from datetime import date
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 class Formateur(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     nom = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
 
+    def __str__(self):
+        return self.nom
+    
 class Formation(models.Model):
     titre = models.CharField(max_length=200)
     description = models.TextField()
@@ -15,8 +19,12 @@ class Formation(models.Model):
     formateur = models.ForeignKey(Formateur, on_delete=models.CASCADE)
 
 class Stagiaire(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     nom = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
+
+    def __str__(self):
+        return self.nom
 
 class Inscription(models.Model):
     formation = models.ForeignKey(Formation, on_delete=models.CASCADE)
@@ -36,11 +44,3 @@ class NoteFormation(models.Model):
     def __str__(self):
         return f"{self.stagiaire} - {self.formation} : {self.note}"
 
-class NoteFormation(models.Model):
-    stagiaire = models.ForeignKey('Stagiaire', on_delete=models.CASCADE)
-    formation = models.ForeignKey('Formation', on_delete=models.CASCADE)
-    note = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
-    commentaire = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Note {self.note} - {self.stagiaire} pour {self.formation}"

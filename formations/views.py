@@ -9,12 +9,15 @@ from django.utils import timezone
 from rest_framework import status
 from django.db.models import Avg
 from .models import NoteFormation
-
-from formations import models
+from .serializers import RegisterFormateurSerializer, RegisterStagiaireSerializer
+from .permissions import IsStagiaire, IsFormateur
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class FormateurViewSet(viewsets.ModelViewSet):
     queryset = Formateur.objects.all()
     serializer_class = FormateurSerializer
+    permission_classes = [IsAuthenticated, IsFormateur]
 
 class FormationViewSet(viewsets.ModelViewSet):
     queryset = Formation.objects.all()
@@ -68,6 +71,7 @@ def formations_a_venir(request):
 @api_view(['POST'])
 def noter_formation(request):
     serializer = NoteFormationSerializer(data=request.data)
+    permission_classes = [IsAuthenticated, IsStagiaire]
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -85,3 +89,20 @@ def moyennes_formations(request):
 class NoteFormationViewSet(viewsets.ModelViewSet):
     queryset = NoteFormation.objects.all()
     serializer_class = NoteFormationSerializer
+
+@api_view(['POST'])
+def register_stagiaire(request):
+    serializer = RegisterStagiaireSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Stagiaire inscrit avec succès.'}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def register_formateur(request):
+    serializer = RegisterFormateurSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Formateur inscrit avec succès.'}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
